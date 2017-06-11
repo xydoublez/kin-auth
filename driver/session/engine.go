@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/jban332/kin-openapi/jsoninfo"
 	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kin/core/jwt"
-	"github.com/jban332/kin/service/auth"
-	"github.com/jban332/kin/service/auth/openapi3auth"
+	"github.com/jban332/kincore/jwt"
+	"github.com/jban332/kinauth"
+	"github.com/jban332/kinauth/openapi3auth"
 	"net/http"
 	"time"
 )

@@ -2,9 +2,9 @@ package gae_test
 
 import (
 	"context"
-	"github.com/jban332/kin/core/jsontest"
-	"github.com/jban332/kin/core/kincontext"
-	"github.com/jban332/kin/service/auth/driver/gae"
+	"github.com/jban332/kincore/jsontest"
+	"github.com/jban332/kincore/kincontext"
+	"github.com/jban332/kinauth/driver/gae"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
 	"google.golang.org/appengine/user"

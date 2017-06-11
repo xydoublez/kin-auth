@@ -3,9 +3,9 @@ package openapi3auth
 import (
 	"context"
 	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kin/service/auth"
-	"github.com/jban332/kin/service/auth/driver/csrf"
-	"github.com/jban332/kin/service/auth/driver/oauth2"
+	"github.com/jban332/kinauth"
+	"github.com/jban332/kinauth/driver/csrf"
+	"github.com/jban332/kinauth/driver/oauth2"
 	"os"
 )
 

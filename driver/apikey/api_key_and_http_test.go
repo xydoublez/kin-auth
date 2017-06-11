@@ -3,9 +3,9 @@ package apikey_test
 import (
 	"context"
 	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kin/core/jsontest"
-	"github.com/jban332/kin/core/kincontext"
-	"github.com/jban332/kin/service/auth/driver/apikey"
+	"github.com/jban332/kincore/jsontest"
+	"github.com/jban332/kincore/kincontext"
+	"github.com/jban332/kinauth/driver/apikey"
 	"testing"
 )
 

@@ -3,10 +3,10 @@ package csrf_test
 import (
 	"context"
 	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kin/core/jsontest"
-	"github.com/jban332/kin/core/kincontext"
-	"github.com/jban332/kin/service/auth"
-	"github.com/jban332/kin/service/auth/driver/csrf"
+	"github.com/jban332/kincore/jsontest"
+	"github.com/jban332/kincore/kincontext"
+	"github.com/jban332/kinauth"
+	"github.com/jban332/kinauth/driver/csrf"
 	"testing"
 )
 

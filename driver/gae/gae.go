@@ -3,9 +3,9 @@ package gae
 import (
 	"context"
 	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kin/core/kincontext"
-	"github.com/jban332/kin/service/auth"
-	"github.com/jban332/kin/service/auth/openapi3auth"
+	"github.com/jban332/kincore/kincontext"
+	"github.com/jban332/kinauth"
+	"github.com/jban332/kinauth/openapi3auth"
 	"google.golang.org/appengine"
 	gaeuser "google.golang.org/appengine/user"
 )

@@ -5,9 +5,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kin/core/jwt"
-	"github.com/jban332/kin/core/weberrors"
-	"github.com/jban332/kin/service/auth"
+	"github.com/jban332/kincore/jwt"
+	"github.com/jban332/kincore/weberrors"
+	"github.com/jban332/kinauth"
 	"net/http"
 	"strings"
 )

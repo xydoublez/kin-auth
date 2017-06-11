@@ -2,9 +2,9 @@ package auth
 
 import (
 	"context"
-	"github.com/jban332/kin/core/kincontext"
-	"github.com/jban332/kin/core/weberrors"
-	"github.com/jban332/kin/service/log"
+	"github.com/jban332/kincore/kincontext"
+	"github.com/jban332/kincore/weberrors"
+	"github.com/jban332/kinlog"
 	"net/http"
 	"net/url"
 )

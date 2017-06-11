@@ -6,9 +6,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kin/core/weberrors"
-	"github.com/jban332/kin/service/auth"
-	"github.com/jban332/kin/service/log"
+	"github.com/jban332/kincore/weberrors"
+	"github.com/jban332/kinauth"
+	"github.com/jban332/kinlog"
 	"net/http"
 )
 

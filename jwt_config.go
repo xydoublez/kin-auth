@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"github.com/jban332/kin/core/jwt"
+	"github.com/jban332/kincore/jwt"
 	"github.com/jban332/kin-openapi/jsoninfo"
 )
 
