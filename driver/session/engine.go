@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/jban332/kin-openapi/jsoninfo"
-	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kincore/jwt"
-	"github.com/jban332/kinauth"
-	"github.com/jban332/kinauth/openapi3auth"
 	"net/http"
 	"time"
+
+	"github.com/jban332/kin-auth"
+	"github.com/jban332/kin-auth/jwt"
+	"github.com/jban332/kin-auth/openapi3auth"
+	"github.com/jban332/kin-openapi/openapi3"
 )
 
 func init() {
@@ -40,14 +40,6 @@ type Engine struct {
 
 	// Optional schema of the session object
 	Schema *openapi3.Schema `json:"schema,omitempty"`
-}
-
-func (value *Engine) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStructFields(value)
-}
-
-func (value *Engine) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStructFields(data, value)
 }
 
 func (engine *Engine) GetCookieConfig() *auth.CookieConfig {

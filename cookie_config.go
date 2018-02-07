@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"errors"
-	"github.com/jban332/kin-openapi/jsoninfo"
 	"net/http"
 	"time"
 )
@@ -17,14 +16,6 @@ type CookieConfig struct {
 	Path                 string `json:"path,omitempty"`
 	MaxAge               int    `json:"maxAge,omitempty"`
 	ReadableByJavascript bool   `json:"readableByJavascript,omitempty"`
-}
-
-func (cookieConfig *CookieConfig) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStructFields(cookieConfig)
-}
-
-func (cookieConfig *CookieConfig) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStructFields(data, cookieConfig)
 }
 
 func (cookieConfig *CookieConfig) Validate(c context.Context) error {

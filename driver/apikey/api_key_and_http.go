@@ -4,26 +4,26 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kincore/jwt"
-	"github.com/jban332/kincore/weberrors"
-	"github.com/jban332/kinauth"
 	"net/http"
 	"strings"
+
+	"github.com/jban332/kin-auth"
+	"github.com/jban332/kin-auth/jwt"
+	"github.com/jban332/kin-openapi/openapi3"
 )
 
 const httpStatusForSecurityFailure = http.StatusUnauthorized
 
 var (
-	ErrAPIKeyMissing    = weberrors.New(httpStatusForSecurityFailure, "API key is missing")
-	ErrAPIKeyNotCorrect = weberrors.New(httpStatusForSecurityFailure, "API key is incorrect")
+	ErrAPIKeyMissing    = auth.NewError(httpStatusForSecurityFailure, "API key is missing")
+	ErrAPIKeyNotCorrect = auth.NewError(httpStatusForSecurityFailure, "API key is incorrect")
 
-	ErrAuthorizationHeaderMissing          = weberrors.New(httpStatusForSecurityFailure, "HTTP header 'Authorization' is missing")
-	ErrAuthorizationHeaderNotBasic         = weberrors.New(httpStatusForSecurityFailure, "HTTP header 'Authorization' should start with 'Basic '")
-	ErrAuthorizationHeaderNotBearer        = weberrors.New(httpStatusForSecurityFailure, "HTTP header 'Authorization' should start with 'Bearer '")
-	ErrAuthorizationHeaderNotValidBasic    = weberrors.New(httpStatusForSecurityFailure, "HTTP header 'Authorization' should be valid base64-encoded username:password")
-	ErrAuthorizationHeaderNotCorrectBasic  = weberrors.New(httpStatusForSecurityFailure, "Incorrect user name or password")
-	ErrAuthorizationHeaderNotCorrectBearer = weberrors.New(httpStatusForSecurityFailure, "Incorrect API key")
+	ErrAuthorizationHeaderMissing          = auth.NewError(httpStatusForSecurityFailure, "HTTP header 'Authorization' is missing")
+	ErrAuthorizationHeaderNotBasic         = auth.NewError(httpStatusForSecurityFailure, "HTTP header 'Authorization' should start with 'Basic '")
+	ErrAuthorizationHeaderNotBearer        = auth.NewError(httpStatusForSecurityFailure, "HTTP header 'Authorization' should start with 'Bearer '")
+	ErrAuthorizationHeaderNotValidBasic    = auth.NewError(httpStatusForSecurityFailure, "HTTP header 'Authorization' should be valid base64-encoded username:password")
+	ErrAuthorizationHeaderNotCorrectBasic  = auth.NewError(httpStatusForSecurityFailure, "Incorrect user name or password")
+	ErrAuthorizationHeaderNotCorrectBearer = auth.NewError(httpStatusForSecurityFailure, "Incorrect API key")
 )
 
 type ValidationInput struct {
@@ -41,7 +41,7 @@ type Engine struct {
 func (engine *Engine) Authenticate(c context.Context, state auth.State, scopes []string) error {
 	f := engine.KeyValidatorFunc
 	if f == nil {
-		return weberrors.New(httpStatusForSecurityFailure, "API key security engine configuration is missing key validator function")
+		return auth.NewError(httpStatusForSecurityFailure, "API key security engine configuration is missing key validator function")
 	}
 	apiKey, err := getAPIKeyValue(state, engine.SecurityScheme)
 	if err != nil {
@@ -61,7 +61,7 @@ func (engine *Engine) WithJWT(jwtConfig *jwt.Config) *Engine {
 			return err
 		}
 		if err := jwt.CheckNotExpired(data); err != nil {
-			return weberrors.NewFrom(httpStatusForSecurityFailure, err)
+			return auth.NewError(httpStatusForSecurityFailure, "", err)
 		}
 		jwtConfig.CheckNotRevoked(c, data)
 		return nil
@@ -79,14 +79,14 @@ func getAPIKeyValue(state auth.State, securityScheme *openapi3.SecurityScheme) (
 			value := state.QueryParams().Get(name)
 			if len(value) == 0 {
 				msg := fmt.Sprintf("Query parameter '%s' is missing", name)
-				return "", weberrors.New(httpStatusForSecurityFailure, msg)
+				return "", auth.NewError(httpStatusForSecurityFailure, msg)
 			}
 			return value, nil
 		case openapi3.ParameterInHeader:
 			values := state.Request().Header[http.CanonicalHeaderKey(name)]
 			if len(values) == 0 {
 				msg := fmt.Sprintf("HTTP header '%s' is missing", name)
-				return "", weberrors.New(httpStatusForSecurityFailure, msg)
+				return "", auth.NewError(httpStatusForSecurityFailure, msg)
 			}
 			return values[0], nil
 		default:

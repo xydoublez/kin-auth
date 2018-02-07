@@ -2,11 +2,13 @@ package apikey_test
 
 import (
 	"context"
-	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kincore/jsontest"
-	"github.com/jban332/kincore/kincontext"
-	"github.com/jban332/kinauth/driver/apikey"
+	"net/http"
 	"testing"
+
+	auth "github.com/jban332/kin-auth"
+	"github.com/jban332/kin-auth/driver/apikey"
+	"github.com/jban332/kin-openapi/openapi3"
+	"github.com/jban332/kin-test/jsontest"
 )
 
 func TestAPIKey(t *testing.T) {
@@ -24,26 +26,26 @@ func TestAPIKey(t *testing.T) {
 			return apikey.ErrAPIKeyNotCorrect
 		},
 	}
-	task := kincontext.NewFakeTask("GET", "/", nil)
-	header := task.Request().Header
+	req, _ := http.NewRequest("GET", "/", nil)
+	state := auth.NewState(nil, req)
 	var err error
 
 	// No value at all
-	err = engine.Authenticate(c, task, []string{
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).ErrString("HTTP header 'X-API-Key' is missing")
 
 	// Wrong value
-	header.Set("X-API-Key", "wrong")
-	err = engine.Authenticate(c, task, []string{
+	req.Header.Set("X-API-Key", "wrong")
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).Err(apikey.ErrAPIKeyNotCorrect)
 
 	// Correct value
-	header.Set("X-API-Key", "qwerty")
-	err = engine.Authenticate(c, task, []string{
+	req.Header.Set("X-API-Key", "qwerty")
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).Err(nil)
@@ -63,26 +65,27 @@ func TestHTTPBearer(t *testing.T) {
 			return apikey.ErrAPIKeyNotCorrect
 		},
 	}
-	task := kincontext.NewFakeTask("GET", "/", nil)
-	header := task.Request().Header
+	req, _ := http.NewRequest("GET", "/", nil)
+	state := auth.NewState(nil, req)
+	header := req.Header
 	var err error
 
 	// No value at all
-	err = engine.Authenticate(c, task, []string{
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).Err(apikey.ErrAuthorizationHeaderMissing)
 
 	// Wrong value
 	header.Set("Authorization", "Bearer wrong")
-	err = engine.Authenticate(c, task, []string{
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).Err(apikey.ErrAPIKeyNotCorrect)
 
 	// Correct value
 	header.Set("Authorization", "Bearer qwerty")
-	err = engine.Authenticate(c, task, []string{
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).Err(nil)
@@ -102,26 +105,26 @@ func TestHTTPBasic(t *testing.T) {
 			return apikey.ErrAPIKeyNotCorrect
 		},
 	}
-	task := kincontext.NewFakeTask("GET", "/", nil)
-	req := task.Request()
+	req, _ := http.NewRequest("GET", "/", nil)
+	state := auth.NewState(nil, req)
 	var err error
 
 	// No value at all
-	err = engine.Authenticate(c, task, []string{
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).Err(apikey.ErrAuthorizationHeaderMissing)
 
 	// Wrong value
 	req.SetBasicAuth("adam", "wrong")
-	err = engine.Authenticate(c, task, []string{
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).Err(apikey.ErrAPIKeyNotCorrect)
 
 	// Correct value
 	req.SetBasicAuth("adam", "qwerty")
-	err = engine.Authenticate(c, task, []string{
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).Err(nil)

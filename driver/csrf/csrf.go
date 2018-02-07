@@ -5,11 +5,11 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kincore/weberrors"
-	"github.com/jban332/kinauth"
-	"github.com/jban332/kinlog"
 	"net/http"
+
+	"github.com/jban332/kin-auth"
+	"github.com/jban332/kin-log"
+	"github.com/jban332/kin-openapi/openapi3"
 )
 
 const httpStatusForSecurityFailure = http.StatusUnauthorized
@@ -53,7 +53,7 @@ func (engine *Engine) Authenticate(c context.Context, state auth.State, scopes [
 	default:
 		msg := fmt.Sprintf("Anti-XSS security engine can't be used with a security scheme of type '%s'",
 			securityScheme.Type)
-		return weberrors.New(httpStatusForSecurityFailure, msg)
+		return auth.NewError(httpStatusForSecurityFailure, msg)
 	}
 	name := securityScheme.Name
 	in := securityScheme.In
@@ -65,13 +65,13 @@ func (engine *Engine) Authenticate(c context.Context, state auth.State, scopes [
 		value = state.QueryParams().Get(name)
 		if len(value) == 0 {
 			msg := fmt.Sprintf("Query parameter '%s' is missing", name)
-			return weberrors.New(httpStatusForSecurityFailure, msg)
+			return auth.NewError(httpStatusForSecurityFailure, msg)
 		}
 	case openapi3.ParameterInHeader:
 		values := state.Request().Header[http.CanonicalHeaderKey(name)]
 		if len(values) == 0 {
 			msg := fmt.Sprintf("HTTP header '%s' is missing", name)
-			return weberrors.New(httpStatusForSecurityFailure, msg)
+			return auth.NewError(httpStatusForSecurityFailure, msg)
 		}
 		value = values[0]
 	default:
@@ -85,7 +85,7 @@ func (engine *Engine) Authenticate(c context.Context, state auth.State, scopes [
 	}
 	cookieName := cookieConfig.Name
 	if cookieName == "" {
-		return weberrors.New(httpStatusForSecurityFailure,
+		return auth.NewError(httpStatusForSecurityFailure,
 			"Anti-XSS security engine configuration is missing cookie name")
 	}
 
@@ -93,12 +93,12 @@ func (engine *Engine) Authenticate(c context.Context, state auth.State, scopes [
 	cookie, _ := state.Request().Cookie(cookieName)
 	if cookie == nil {
 		msg := fmt.Sprintf("Anti-XSS cookie '%s' is missing from the request", cookieName)
-		return weberrors.New(httpStatusForSecurityFailure, msg)
+		return auth.NewError(httpStatusForSecurityFailure, msg)
 	}
 	cookieValue := cookie.Value
 	if cookieValue == "" {
 		msg := fmt.Sprintf("Anti-XSS cookie '%s' has empty value in the request", cookieName)
-		return weberrors.New(httpStatusForSecurityFailure, msg)
+		return auth.NewError(httpStatusForSecurityFailure, msg)
 	}
 
 	// Ensure that the two values are equal
@@ -118,5 +118,5 @@ func (engine *Engine) Authenticate(c context.Context, state auth.State, scopes [
 		log.String("in", securityScheme.In))
 	msg := fmt.Sprintf("%s '%s' ('%s') does not match value of the cookie '%s' ('%s')",
 		where, securityScheme.Name, value, cookieName, cookieValue)
-	return weberrors.New(httpStatusForSecurityFailure, msg)
+	return auth.NewError(httpStatusForSecurityFailure, msg)
 }

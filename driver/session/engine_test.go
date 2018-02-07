@@ -1,13 +1,13 @@
 package session_test
 
 import (
-	"github.com/jban332/kincore/jwt"
-	"github.com/jban332/kincore/kincontext"
-	"github.com/jban332/kincore/webtest"
-	"github.com/jban332/kinauth"
-	"github.com/jban332/kinauth/driver/session"
 	"net/http"
 	"testing"
+
+	"github.com/jban332/kin-auth"
+	"github.com/jban332/kin-auth/driver/session"
+	"github.com/jban332/kin-auth/jwt"
+	"github.com/jban332/kin-test/webtest"
 )
 
 func TestSession(t *testing.T) {
@@ -20,7 +20,7 @@ func TestSession(t *testing.T) {
 	}
 	app := http.NewServeMux()
 	app.HandleFunc("/login", func(resp http.ResponseWriter, req *http.Request) {
-		c := kincontext.NewContext(resp, req)
+		c := req.Context()
 		state := auth.NewState(c, req)
 		cookie, err := engine.NewCookie(c, state, createdSession)
 		if err != nil {

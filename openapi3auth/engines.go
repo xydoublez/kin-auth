@@ -2,10 +2,11 @@ package openapi3auth
 
 import (
 	"context"
-	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kinauth"
-	"github.com/jban332/kinlog"
 	"net/http"
+
+	"github.com/jban332/kin-auth"
+	"github.com/jban332/kin-log"
+	"github.com/jban332/kin-openapi/openapi3"
 )
 
 const httpStatusForSecurityFailure = http.StatusUnauthorized
@@ -21,7 +22,7 @@ func NewEngine(c context.Context, name string, securityScheme *openapi3.Security
 func PutEnginesInSwagger(c context.Context, engines Engines, swagger *openapi3.Swagger) error {
 	if securitySchemes := swagger.Components.SecuritySchemes; securitySchemes != nil {
 		for name, securityScheme := range securitySchemes {
-			engine, err := NewEngine(c, name, securityScheme)
+			engine, err := NewEngine(c, name, securityScheme.Value)
 			if err != nil {
 				return err
 			}

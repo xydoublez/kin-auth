@@ -7,24 +7,24 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kincore/webclient"
-	"github.com/jban332/kincore/weberrors"
-	"github.com/jban332/kinauth"
-	"github.com/jban332/kinlog"
-	"golang.org/x/oauth2"
 	"net/http"
 	"strings"
+
+	"github.com/jban332/go-httphelpers/webclient"
+	"github.com/jban332/kin-auth"
+	"github.com/jban332/kin-log"
+	"github.com/jban332/kin-openapi/openapi3"
+	"golang.org/x/oauth2"
 )
 
 const httpStatusForSecurityFailure = http.StatusUnauthorized
 
 // OAuth2 errors
 var (
-	ErrFlowMissing                  = weberrors.New(httpStatusForSecurityFailure, "OAuth2 security scheme does not have 'authorizationCode' flow.")
-	ErrAuthorizationHeaderMissing   = weberrors.New(httpStatusForSecurityFailure, "OAuth2 failed because header 'Authorization' is missing")
-	ErrAuthorizationHeaderNotBearer = weberrors.New(httpStatusForSecurityFailure, "OAuth2 failed because header 'Authorization' does not have prefix 'Bearer '")
-	ErrExchangeFailed               = weberrors.New(httpStatusForSecurityFailure, "OAuth2 exchange with the identity provider failed")
+	ErrFlowMissing                  = auth.NewError(httpStatusForSecurityFailure, "OAuth2 security scheme does not have 'authorizationCode' flow.")
+	ErrAuthorizationHeaderMissing   = auth.NewError(httpStatusForSecurityFailure, "OAuth2 failed because header 'Authorization' is missing")
+	ErrAuthorizationHeaderNotBearer = auth.NewError(httpStatusForSecurityFailure, "OAuth2 failed because header 'Authorization' does not have prefix 'Bearer '")
+	ErrExchangeFailed               = auth.NewError(httpStatusForSecurityFailure, "OAuth2 exchange with the identity provider failed")
 )
 
 type Engine struct {

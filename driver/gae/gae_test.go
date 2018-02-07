@@ -2,13 +2,14 @@ package gae_test
 
 import (
 	"context"
-	"github.com/jban332/kincore/jsontest"
-	"github.com/jban332/kincore/kincontext"
-	"github.com/jban332/kinauth/driver/gae"
+	"testing"
+
+	"github.com/jban332/kin-auth"
+	"github.com/jban332/kin-auth/driver/gae"
+	"github.com/jban332/kin-test/jsontest"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
 	"google.golang.org/appengine/user"
-	"testing"
 )
 
 func TestGae(t *testing.T) {
@@ -25,50 +26,47 @@ func TestGae(t *testing.T) {
 	}
 	engine := &gae.Engine{}
 
-	newContext := func(u *user.User) (context.Context, kincontext.Task) {
+	newContext := func(u *user.User) (context.Context, auth.State) {
 		req, err := instance.NewRequest("GET", "/", nil)
 		if err != nil {
 			panic(err)
 		}
-		c := kincontext.NewContext(nil, req)
+		c := req.Context()
 		c = appengine.WithContext(c, req)
-		task := kincontext.NewTask(nil, req)
 		if u != nil {
 			aetest.Login(u, req)
 			t.Logf("Logged in as '%s'", u.Email)
 		}
-		return c, task
+		return c, auth.NewState(c, req)
 	}
 
 	// No user
 	{
-		c, task := newContext(nil)
-		err = engine.Authenticate(c,
-			task,
-			nil)
+		c, state := newContext(nil)
+		err = engine.Authenticate(c, state, nil)
 		jsontest.ExpectErr(t, err).SomeErr()
 	}
 
 	// Logged-in
 	{
-		c, task := newContext(&user.User{
+		c, state := newContext(&user.User{
 			ID:    "someUser",
 			Email: "user@example.com",
 		})
 		err = engine.Authenticate(c,
-			task,
+			state,
 			nil)
 		jsontest.ExpectErr(t, err).Err(nil)
 	}
 
 	// No admin
 	{
-		c, task := newContext(&user.User{
+		c, state := newContext(&user.User{
 			ID:    "someUser",
 			Email: "user@example.com",
 		})
 		err = engine.Authenticate(c,
-			task,
+			state,
 			[]string{
 				"admin",
 			})
@@ -77,13 +75,13 @@ func TestGae(t *testing.T) {
 
 	// Admin
 	{
-		c, task := newContext(&user.User{
+		c, state := newContext(&user.User{
 			Admin: true,
 			ID:    "someUser",
 			Email: "user@example.com",
 		})
 		err = engine.Authenticate(c,
-			task,
+			state,
 			[]string{
 				"admin",
 			})

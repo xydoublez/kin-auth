@@ -2,16 +2,13 @@ package auth
 
 import (
 	"context"
-	"github.com/jban332/kincore/kincontext"
-	"github.com/jban332/kincore/weberrors"
-	"github.com/jban332/kinlog"
 	"net/http"
 	"net/url"
+
+	"github.com/jban332/kin-log"
 )
 
 var Drivers = make(map[string]func() Driver, 8)
-
-var ErrAuthFailed = weberrors.New(http.StatusUnauthorized, "User authentication failed")
 
 var Logger = log.NewLogger().WithPrefix("auth: ")
 
@@ -32,6 +29,24 @@ type State interface {
 	QueryParams() url.Values
 }
 
+// NewState creates a new state.
 func NewState(c context.Context, req *http.Request) State {
-	return kincontext.NewTask(nil, req)
+	queryParams := req.URL.Query()
+	return &state{
+		request:     req,
+		queryParams: queryParams,
+	}
+}
+
+type state struct {
+	request     *http.Request
+	queryParams url.Values
+}
+
+func (state *state) Request() *http.Request {
+	return state.request
+}
+
+func (state *state) QueryParams() url.Values {
+	return state.queryParams
 }

@@ -2,12 +2,14 @@ package csrf_test
 
 import (
 	"context"
-	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kincore/jsontest"
-	"github.com/jban332/kincore/kincontext"
-	"github.com/jban332/kinauth"
-	"github.com/jban332/kinauth/driver/csrf"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/jban332/kin-auth"
+	"github.com/jban332/kin-auth/driver/csrf"
+	"github.com/jban332/kin-openapi/openapi3"
+	"github.com/jban332/kin-test/jsontest"
 )
 
 func TestCSRF(t *testing.T) {
@@ -22,8 +24,10 @@ func TestCSRF(t *testing.T) {
 			Name: "Example-Header",
 		},
 	}
-	task := kincontext.NewFakeTask("GET", "https://localhost/", nil)
-	cookie, err := engine.NewCookie(nil, task)
+	req, _ := http.NewRequest("GET", "https://localhost/", nil)
+	state := auth.NewState(nil, req)
+	resp := httptest.NewRecorder()
+	cookie, err := engine.NewCookie(nil, state)
 	if len(cookie.Value) < 16 {
 		t.Fatalf("Cookie value is too short")
 	}
@@ -32,32 +36,38 @@ func TestCSRF(t *testing.T) {
 	}
 
 	// No token
-	err = engine.Authenticate(c, task, []string{
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).SomeErr()
 
 	// Only token in header
-	task = kincontext.NewFakeTask("GET", "https://localhost/", nil)
-	task.Request().Header.Set("Example-Header", cookie.Value)
-	err = engine.Authenticate(c, task, []string{
+	req, _ = http.NewRequest("GET", "https://localhost/", nil)
+	state = auth.NewState(nil, req)
+	resp = httptest.NewRecorder()
+	req.Header.Set("Example-Header", cookie.Value)
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).SomeErr()
 
 	// Only token in cookies
-	task = kincontext.NewFakeTask("GET", "https://localhost/", nil)
-	task.Request().AddCookie(cookie)
-	err = engine.Authenticate(c, task, []string{
+	req, _ = http.NewRequest("GET", "https://localhost/", nil)
+	state = auth.NewState(nil, req)
+	resp = httptest.NewRecorder()
+	http.SetCookie(resp, cookie)
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).SomeErr()
 
 	// OK
-	task = kincontext.NewFakeTask("GET", "https://localhost/", nil)
-	task.Request().Header.Set("Example-Header", cookie.Value)
-	task.Request().AddCookie(cookie)
-	err = engine.Authenticate(c, task, []string{
+	req, _ = http.NewRequest("GET", "https://localhost/", nil)
+	state = auth.NewState(nil, req)
+	resp = httptest.NewRecorder()
+	req.Header.Set("Example-Header", cookie.Value)
+	req.AddCookie(cookie)
+	err = engine.Authenticate(c, state, []string{
 		"admin",
 	})
 	jsontest.ExpectErr(t, err).Err(nil)

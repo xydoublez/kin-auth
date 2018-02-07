@@ -2,11 +2,10 @@ package gae
 
 import (
 	"context"
+
+	"github.com/jban332/kin-auth"
+	"github.com/jban332/kin-auth/openapi3auth"
 	"github.com/jban332/kin-openapi/openapi3"
-	"github.com/jban332/kincore/kincontext"
-	"github.com/jban332/kinauth"
-	"github.com/jban332/kinauth/openapi3auth"
-	"google.golang.org/appengine"
 	gaeuser "google.golang.org/appengine/user"
 )
 
@@ -14,7 +13,7 @@ func init() {
 	// IMPORTANT: This is an abuse of OpenAPI3 specification.
 	//
 	// In practice this should be ok.
-	openapi3auth.RegisterFactory("gae", func(c context.Context, securitySchema *openapi3.SecurityScheme) (auth.Driver, error) {
+	openapi3auth.RegisterFactory("gae", func(c context.Context, securityScheme *openapi3.SecurityScheme) (auth.Driver, error) {
 		return &Engine{}, nil
 	})
 }
@@ -28,7 +27,6 @@ var (
 type Engine struct{}
 
 func (engine *Engine) Authenticate(c context.Context, state auth.State, scopes []string) error {
-	c = appengine.WithContext(c, kincontext.GetTask(c).Request())
 	u := gaeuser.Current(c)
 	if u == nil || u.Email == "" {
 		return auth.ErrAuthFailed
@@ -47,7 +45,6 @@ func (engine *Engine) Authenticate(c context.Context, state auth.State, scopes [
 }
 
 func (engine *Engine) LoginURL(c context.Context, scopes []string, callbackURL string) (string, error) {
-	c = appengine.WithContext(c, kincontext.MustGetTask(c).Request())
 	url, err := gaeuser.LoginURL(c, callbackURL)
 	if err != nil {
 		return "", err
@@ -56,7 +53,6 @@ func (engine *Engine) LoginURL(c context.Context, scopes []string, callbackURL s
 }
 
 func (engine *Engine) LogoutURL(c context.Context, callbackURL string) (string, error) {
-	c = appengine.WithContext(c, kincontext.MustGetTask(c).Request())
 	url, err := gaeuser.LogoutURL(c, callbackURL)
 	if err != nil {
 		return "", err

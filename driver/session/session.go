@@ -1,7 +1,6 @@
 package session
 
 import (
-	"github.com/jban332/kin-openapi/jsoninfo"
 	"sort"
 	"time"
 )
@@ -21,14 +20,6 @@ type Session struct {
 
 	// Optional scopes.
 	Scopes []string `json:"sco,omitempty"`
-}
-
-func (value *Session) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStructFields(value)
-}
-
-func (value *Session) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStructFields(data, value)
 }
 
 func NewSessionFrom(old *Session) *Session {
